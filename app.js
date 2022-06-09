@@ -33,7 +33,13 @@ app.get('/campgrounds', async (req, res) => {
     const campgrounds = await Campground.find({});
     res.render('campgrounds/index', { campgrounds })
 })
-//temporary home for all campgrounds, async await, passing campgrounds 
+//temporary home for all campgrounds, async await, passing campgrounds
+
+app.get('/campgrounds/:id', async (req, res) => {
+    const campground = await Campground.findById(req.params.id);
+    res.render('campgrounds/show', { campground })
+})
+//show details of single campground
 
 
 app.listen(3000, () => {
