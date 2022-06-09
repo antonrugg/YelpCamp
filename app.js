@@ -29,12 +29,12 @@ app.get('/', (req, res) => {
 })
 //rendering home view
 
-app.get('/makecampground', async (req, res) => {
-    const camp = new Campground({ title: 'My Backyard', description: 'cheap camping!' });
-    await camp.save();
-    res.send(camp);
+app.get('/campgrounds', async (req, res) => {
+    const campgrounds = await Campground.find({});
+    res.render('campgrounds/index', { campgrounds })
 })
-//async function, sending a response with our first CampGround at /makecampground for testing purposes
+//temporary home for all campgrounds, async await, passing campgrounds 
+
 
 app.listen(3000, () => {
     console.log('serving on port 3000')
