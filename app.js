@@ -1,9 +1,10 @@
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
+const ejsMate = require('ejs-mate');
 const methodOverride = require('method-override');
 const Campground = require('./models/campground');
-//requiring what we need to start
+//requiring what we need to start and campground model
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp');
 //we connect to localhost standard mongodb port for now (in development)
@@ -20,7 +21,7 @@ db.once('open', () => {
 
 const app = express();
 
-
+app.engine('ejs', ejsMate);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 //setting ejs as view engine, setting views as default path
@@ -46,10 +47,12 @@ app.get('/campgrounds/new', (req, res) => {
 //get request for new campground form
 
 app.post('/campgrounds', async (req, res) => {
+    
     const campground = new Campground(req.body.campground);
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`);
 });
+//post request for new campground
 
 app.get('/campgrounds/:id', async (req, res) => {
     const campground = await Campground.findById(req.params.id);
@@ -61,18 +64,21 @@ app.get('/campgrounds/:id/edit', async (req, res) => {
     const campground = await Campground.findById(req.params.id);
     res.render('campgrounds/edit', { campground });
 });
+//show edit form of single campground
 
 app.put('/campgrounds/:id', async (req, res) => {
     const { id } = req.params
     const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground });
     res.redirect(`/campgrounds/${campground._id}`);
 });
+//put request for single update campground
 
 app.delete('/campgrounds/:id', async (req, res) => {
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
     res.redirect('/campgrounds')
 })
+//delete single campground
 
 
 
