@@ -37,8 +37,12 @@ app.get('/', (req, res) => {
 //rendering home view
 
 app.get('/campgrounds', async (req, res) => {
-    const campgrounds = await Campground.find({});
-    res.render('campgrounds/index', { campgrounds })
+    try {
+        const campgrounds = await Campground.find({});
+        res.render('campgrounds/index', { campgrounds })
+    } catch (e) {
+        next(e);
+    }
 });
 //temporary home for all campgrounds, async await, passing campgrounds
 
@@ -47,41 +51,64 @@ app.get('/campgrounds/new', (req, res) => {
 });
 //get request for new campground form
 
-app.post('/campgrounds', async (req, res) => {
-    
-    const campground = new Campground(req.body.campground);
-    await campground.save();
-    res.redirect(`/campgrounds/${campground._id}`);
+app.post('/campgrounds', async (req, res, next) => {
+    try {
+        const campground = new Campground(req.body.campground);
+        await campground.save();
+        res.redirect(`/campgrounds/${campground._id}`);
+    } catch (e) {
+        next(e)
+    }    
 });
 //post request for new campground
+//added try and catch for generic error handler
 
-app.get('/campgrounds/:id', async (req, res) => {
-    const campground = await Campground.findById(req.params.id);
-    res.render('campgrounds/show', { campground });
+app.get('/campgrounds/:id', async (req, res, next) => {
+    try {
+        const campground = await Campground.findById(req.params.id);
+        res.render('campgrounds/show', { campground });
+    } catch (e) {
+        next(e);
+    }
 });
 //show details of single campground
 
-app.get('/campgrounds/:id/edit', async (req, res) => {
-    const campground = await Campground.findById(req.params.id);
-    res.render('campgrounds/edit', { campground });
+app.get('/campgrounds/:id/edit', async (req, res, next) => {
+    try {
+        const campground = await Campground.findById(req.params.id);
+        res.render('campgrounds/edit', { campground });
+    } catch (e) {
+        next(e);
+    }
 });
 //show edit form of single campground
 
-app.put('/campgrounds/:id', async (req, res) => {
-    const { id } = req.params
-    const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground });
-    res.redirect(`/campgrounds/${campground._id}`);
+app.put('/campgrounds/:id', async (req, res, next) => {
+    try {
+        const { id } = req.params
+        const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground });
+        res.redirect(`/campgrounds/${campground._id}`);
+    } catch (e) {
+        next(e);
+    }
 });
 //put request for single update campground
 
-app.delete('/campgrounds/:id', async (req, res) => {
-    const { id } = req.params;
-    await Campground.findByIdAndDelete(id);
-    res.redirect('/campgrounds')
+app.delete('/campgrounds/:id', async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        await Campground.findByIdAndDelete(id);
+        res.redirect('/campgrounds');
+    } catch (e) {
+        next(e);
+    }
 })
 //delete single campground
 
-
+app.use((err, req, res, next) => {
+    res.send('Oh boy, something went wrong!')
+})
+//generic error handler
 
 
 app.listen(3000, () => {
