@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const ejsMate = require('ejs-mate');
+const catchAsync = require('./utils/catchAsync');
 const methodOverride = require('method-override');
 
 const Campground = require('./models/campground');
@@ -36,14 +37,10 @@ app.get('/', (req, res) => {
 });
 //rendering home view
 
-app.get('/campgrounds', async (req, res) => {
-    try {
+app.get('/campgrounds', catchAsync(async (req, res) => {
         const campgrounds = await Campground.find({});
         res.render('campgrounds/index', { campgrounds })
-    } catch (e) {
-        next(e);
-    }
-});
+}));
 //temporary home for all campgrounds, async await, passing campgrounds
 
 app.get('/campgrounds/new', (req, res) => {
@@ -51,58 +48,38 @@ app.get('/campgrounds/new', (req, res) => {
 });
 //get request for new campground form
 
-app.post('/campgrounds', async (req, res, next) => {
-    try {
+app.post('/campgrounds', catchAsync(async (req, res, next) => {
         const campground = new Campground(req.body.campground);
         await campground.save();
         res.redirect(`/campgrounds/${campground._id}`);
-    } catch (e) {
-        next(e)
-    }    
-});
+}));
 //post request for new campground
 //added try and catch for generic error handler
 
-app.get('/campgrounds/:id', async (req, res, next) => {
-    try {
+app.get('/campgrounds/:id', catchAsync(async (req, res, next) => {
         const campground = await Campground.findById(req.params.id);
         res.render('campgrounds/show', { campground });
-    } catch (e) {
-        next(e);
-    }
-});
+}));
 //show details of single campground
 
-app.get('/campgrounds/:id/edit', async (req, res, next) => {
-    try {
+app.get('/campgrounds/:id/edit', catchAsync(async (req, res, next) => {
         const campground = await Campground.findById(req.params.id);
-        res.render('campgrounds/edit', { campground });
-    } catch (e) {
-        next(e);
-    }
-});
+        res.render('campgrounds/edit', { campground }); 
+}));
 //show edit form of single campground
 
-app.put('/campgrounds/:id', async (req, res, next) => {
-    try {
+app.put('/campgrounds/:id', catchAsync(async (req, res, next) => {
         const { id } = req.params
         const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground });
         res.redirect(`/campgrounds/${campground._id}`);
-    } catch (e) {
-        next(e);
-    }
-});
+}));
 //put request for single update campground
 
-app.delete('/campgrounds/:id', async (req, res, next) => {
-    try {
+app.delete('/campgrounds/:id', catchAsync(async (req, res, next) => {
         const { id } = req.params;
         await Campground.findByIdAndDelete(id);
         res.redirect('/campgrounds');
-    } catch (e) {
-        next(e);
-    }
-})
+}));
 //delete single campground
 
 app.use((err, req, res, next) => {
